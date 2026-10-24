@@ -1,0 +1,14 @@
+{
+  "appId": "az.englishlearning.app",
+  "appName": "English Learning App",
+  "webDir": "www",
+  "backgroundColor": "#020617",
+  "server": {
+    "url": "https://english-learing-app-by-good.netlify.app",
+    "androidScheme": "https",
+    "errorPath": "error.html"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

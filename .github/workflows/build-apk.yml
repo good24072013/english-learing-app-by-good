@@ -1,0 +1,70 @@
+name: Build Android APK
+
+# Runs by itself every time something is pushed, or by hand: Actions > Build Android APK > Run workflow
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to publish the APK in "Releases"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Accept Android licences
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Prepare the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD_SECRET: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD_SECRET" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.p12"
+            echo "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD_SECRET" >> "$GITHUB_ENV"
+            echo "Using your own signing key."
+          else
+            keytool -genkeypair -storetype PKCS12 -keystore "$RUNNER_TEMP/release.p12" \
+              -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass temp-pass-123 -keypass temp-pass-123 -dname "CN=English Learning App"
+            echo "KEYSTORE_PASSWORD=temp-pass-123" >> "$GITHUB_ENV"
+            echo "::warning::No KEYSTORE secrets found. A temporary key was used: the app installs, but a later update cannot be installed over it. Add the two secrets (see README)."
+          fi
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
+
+      - name: Build the APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Name the file
+        run: cp android/app/build/outputs/apk/release/app-release.apk english-learning-app.apk
+
+      - name: Publish in Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: English Learning App v1.0.${{ github.run_number }}
+          files: english-learning-app.apk
+          make_latest: true

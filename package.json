@@ -1,0 +1,16 @@
+{
+  "name": "english-learning-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "English Learning App - Android wrapper of the English Learning Portal",
+  "scripts": {
+    "sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}
