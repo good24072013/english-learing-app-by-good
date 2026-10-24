@@ -6,7 +6,7 @@ Bu, **English Learning Portal** saytının Android tətbiqidir. Tətbiq tam ekra
 
 Telefondan bu linkə toxun:
 
-**https://github.com/GITHUB_ADIN/REPO_ADI/releases/latest/download/english-learning-app.apk**
+**https://github.com/good24072013/english-learing-app-by-good/releases/tag/v1.0.6**
 
 (`GITHUB_ADIN` və `REPO_ADI` yerinə öz GitHub adını və repo adını yaz.)
 
